@@ -29,33 +29,48 @@ $input = [
     'contract_agreed' => isset($_POST['contract_agreed']) ? 1 : 0
 ];
 
-// Валидация ФИО (остается без изменений)
+// Валидация ФИО
 if (empty($input['full_name'])) {
     $errors['full_name'] = "ФИО обязательно для заполнения";
 } elseif (!preg_match('/^[а-яА-ЯёЁa-zA-Z\s\-]{2,150}$/u', $input['full_name'])) {
     $errors['full_name'] = "ФИО должно содержать только буквы, пробелы и дефисы (2-150 символов)";
 }
 
-// Валидация пола с учетом нового значения 'other'
-if (empty($input['gender']) || !in_array($input['gender'], ['male', 'female', 'other'])) {
-    $errors['gender'] = "Укажите пол (male, female или other)";
+// Валидация телефона
+if (empty($input['phone'])) {
+    $errors['phone'] = "Телефон обязателен для заполнения";
+} elseif (!preg_match('/^\+?\d{10,15}$/', $input['phone'])) {
+    $errors['phone'] = "Телефон должен содержать 10-15 цифр, может начинаться с +";
 }
 
-// Получаем список допустимых языков из БД
-$allowedLanguages = [];
-try {
-    $stmt = $pdo->query("SELECT id FROM programming_languages");
-    $allowedLanguages = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    $_SESSION['errors']['database'] = "Ошибка при получении списка языков: " . $e->getMessage();
-    header('Location: index.php');
-    exit;
+// Валидация email
+if (empty($input['email'])) {
+    $errors['email'] = "Email обязателен для заполнения";
+} elseif (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
+    $errors['email'] = "Введите корректный email (например, user@example.com)";
+}
+
+// Валидация даты рождения
+if (empty($input['birth_date'])) {
+    $errors['birth_date'] = "Дата рождения обязательна";
+} else {
+    $today = new DateTime();
+    $birthdate = DateTime::createFromFormat('Y-m-d', $input['birth_date']);
+    if (!$birthdate || $birthdate > $today) {
+        $errors['birth_date'] = "Введите корректную дату рождения (не из будущего)";
+    }
+}
+
+// Валидация пола
+if (empty($input['gender']) || !in_array($input['gender'], ['male', 'female'])) {
+    $errors['gender'] = "Укажите пол";
 }
 
 // Валидация языков программирования
 if (empty($input['languages'])) {
     $errors['languages'] = "Выберите хотя бы один язык программирования";
 } else {
+    $allowedLanguages = range(1, 12);
     foreach ($input['languages'] as $langId) {
         if (!in_array($langId, $allowedLanguages)) {
             $errors['languages'] = "Выбран недопустимый язык программирования";
@@ -64,7 +79,10 @@ if (empty($input['languages'])) {
     }
 }
 
-// Остальная валидация остается без изменений...
+// Валидация согласия с контрактом
+if (!$input['contract_agreed']) {
+    $errors['contract_agreed'] = "Необходимо подтвердить ознакомление с контрактом";
+}
 
 // Если есть ошибки
 if (!empty($errors)) {
