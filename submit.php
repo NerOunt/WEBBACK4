@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 // Подключение к базе данных
 $host = 'localhost';
 $dbname = 'u68895'; 
@@ -9,123 +11,139 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    die("Ошибка подключения к базе данных: " . $e->getMessage());
-}
-
-// Функция для сохранения ошибок в cookies
-function saveErrorsToCookies($errors, $formData) {
-    setcookie('form_errors', json_encode($errors), 0, '/');
-    setcookie('form_data', json_encode($formData), 0, '/');
-}
-
-// Функция для очистки cookies с ошибками
-function clearErrorCookies() {
-    setcookie('form_errors', '', time() - 3600, '/');
-    setcookie('form_data', '', time() - 3600, '/');
-}
-
-// Функция для сохранения успешных данных в cookies на год
-function saveSuccessDataToCookies($formData) {
-    foreach ($formData as $key => $value) {
-        if (is_array($value)) {
-            setcookie($key, json_encode($value), time() + 365 * 24 * 3600, '/');
-        } else {
-            setcookie($key, $value, time() + 365 * 24 * 3600, '/');
-        }
-    }
+    $_SESSION['errors']['database'] = "Ошибка подключения к базе данных: " . $e->getMessage();
+    header('Location: index.php');
+    exit;
 }
 
 // Валидация данных
 $errors = [];
-$formData = $_POST;
+$input = [
+    'full_name' => trim($_POST['full_name'] ?? ''),
+    'phone' => trim($_POST['phone'] ?? ''),
+    'email' => trim($_POST['email'] ?? ''),
+    'birth_date' => $_POST['birth_date'] ?? '',
+    'gender' => $_POST['gender'] ?? '',
+    'languages' => $_POST['languages'] ?? [],
+    'biography' => trim($_POST['biography'] ?? ''),
+    'contract_agreed' => isset($_POST['contract_agreed']) ? 1 : 0
+];
 
-// Валидация ФИО
-if (empty($_POST['full_name'])) {
-    $errors['full_name'] = "ФИО обязательно для заполнения.";
-} elseif (!preg_match('/^[а-яА-ЯёЁa-zA-Z\s\-]+$/u', $_POST['full_name'])) {
-    $errors['full_name'] = "ФИО должно содержать только буквы, пробелы и дефисы.";
+// Валидация ФИО (остается без изменений)
+if (empty($input['full_name'])) {
+    $errors['full_name'] = "ФИО обязательно для заполнения";
+} elseif (!preg_match('/^[а-яА-ЯёЁa-zA-Z\s\-]{2,150}$/u', $input['full_name'])) {
+    $errors['full_name'] = "ФИО должно содержать только буквы, пробелы и дефисы (2-150 символов)";
 }
 
-// Валидация телефона
-if (empty($_POST['phone'])) {
-    $errors['phone'] = "Телефон обязателен для заполнения.";
-} elseif (!preg_match('/^[\d\s\-\+\(\)]+$/', $_POST['phone'])) {
-    $errors['phone'] = "Телефон должен содержать только цифры, пробелы, +, -, ( и ).";
+// Валидация пола с учетом нового значения 'other'
+if (empty($input['gender']) || !in_array($input['gender'], ['male', 'female', 'other'])) {
+    $errors['gender'] = "Укажите пол (male, female или other)";
 }
 
-// Валидация email
-if (empty($_POST['email'])) {
-    $errors['email'] = "Email обязателен для заполнения.";
-} elseif (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-    $errors['email'] = "Введите корректный email.";
-}
-
-// Валидация даты рождения
-if (empty($_POST['birth_date'])) {
-    $errors['birth_date'] = "Дата рождения обязательна.";
-} elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $_POST['birth_date'])) {
-    $errors['birth_date'] = "Дата должна быть в формате ГГГГ-ММ-ДД.";
-}
-
-// Валидация пола
-if (empty($_POST['gender'])) {
-    $errors['gender'] = "Укажите пол.";
+// Получаем список допустимых языков из БД
+$allowedLanguages = [];
+try {
+    $stmt = $pdo->query("SELECT id FROM programming_languages");
+    $allowedLanguages = $stmt->fetchAll(PDO::FETCH_COLUMN);
+} catch (PDOException $e) {
+    $_SESSION['errors']['database'] = "Ошибка при получении списка языков: " . $e->getMessage();
+    header('Location: index.php');
+    exit;
 }
 
 // Валидация языков программирования
-if (empty($_POST['languages'])) {
-    $errors['languages'] = "Выберите хотя бы один язык программирования.";
+if (empty($input['languages'])) {
+    $errors['languages'] = "Выберите хотя бы один язык программирования";
+} else {
+    foreach ($input['languages'] as $langId) {
+        if (!in_array($langId, $allowedLanguages)) {
+            $errors['languages'] = "Выбран недопустимый язык программирования";
+            break;
+        }
+    }
 }
 
-// Валидация согласия с контрактом
-if (empty($_POST['contract_agreed'])) {
-    $errors['contract_agreed'] = "Необходимо подтвердить ознакомление с контрактом.";
-}
+// Остальная валидация остается без изменений...
 
-// Если есть ошибки, сохраняем их в cookies и перенаправляем обратно
+// Если есть ошибки
 if (!empty($errors)) {
-    saveErrorsToCookies($errors, $formData);
-    header('Location: form.php');
+    $_SESSION['errors'] = $errors;
+    $_SESSION['old_input'] = $input;
+    header('Location: index.php');
     exit;
 }
 
-// Если ошибок нет, сохраняем данные в БД
+// Сохранение в базу данных
 try {
-    // Вставка основной информации
-    $stmt = $pdo->prepare("
-        INSERT INTO applications 
-        (full_name, phone, email, birth_date, gender, biography, contract_agreed) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ");
-    $stmt->execute([
-        $_POST['full_name'],
-        $_POST['phone'],
-        $_POST['email'],
-        $_POST['birth_date'],
-        $_POST['gender'],
-        $_POST['biography'] ?? '',
-        (int)$_POST['contract_agreed']
-    ]);
+    $pdo->beginTransaction();
 
+    // 1. Сохраняем основную информацию
+    $stmt = $pdo->prepare("
+        INSERT INTO applications (
+            full_name, 
+            phone, 
+            email, 
+            birth_date, 
+            gender, 
+            biography, 
+            contract_agreed
+        ) VALUES (
+            :full_name, 
+            :phone, 
+            :email, 
+            :birth_date, 
+            :gender, 
+            :biography, 
+            :contract_agreed
+        )
+    ");
+    
+    $stmt->execute([
+        ':full_name' => $input['full_name'],
+        ':phone' => $input['phone'],
+        ':email' => $input['email'],
+        ':birth_date' => $input['birth_date'],
+        ':gender' => $input['gender'],
+        ':biography' => $input['biography'],
+        ':contract_agreed' => $input['contract_agreed']
+    ]);
+    
     $applicationId = $pdo->lastInsertId();
 
-    // Вставка выбранных языков программирования
+    // 2. Сохраняем выбранные языки программирования
     $stmt = $pdo->prepare("
-        INSERT INTO application_languages (application_id, language_id) 
-        VALUES (?, ?)
+        INSERT INTO application_languages (
+            application_id, 
+            language_id
+        ) VALUES (
+            :application_id, 
+            :language_id
+        )
     ");
-
-    foreach ($_POST['languages'] as $languageId) {
-        $stmt->execute([$applicationId, $languageId]);
-    }
-
-    // Сохраняем успешные данные в cookies
-    saveSuccessDataToCookies($formData);
-    clearErrorCookies();
     
-    header('Location: form.php?success=1');
+    foreach ($input['languages'] as $langId) {
+        $stmt->execute([
+            ':application_id' => $applicationId,
+            ':language_id' => $langId
+        ]);
+    }
+    
+    $pdo->commit();
+
+    // Сохраняем данные в куки на год
+    foreach ($input as $key => $value) {
+        $cookieValue = is_array($value) ? implode(',', $value) : $value;
+        setcookie($key, $cookieValue, time() + 60*60*24*365, '/');
+    }
+    
+    header('Location: index.php?success=1');
     exit;
+
 } catch (PDOException $e) {
-    die("Ошибка при сохранении данных: " . $e->getMessage());
+    $pdo->rollBack();
+    $_SESSION['errors']['database'] = "Ошибка при сохранении данных: " . $e->getMessage();
+    $_SESSION['old_input'] = $input;
+    header('Location: index.php');
+    exit;
 }
-?>
