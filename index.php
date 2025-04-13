@@ -250,17 +250,17 @@ function isLanguageSelected($languages, $id) {
 
             <!-- Чекбокс Согласие -->
             <div class="form-group <?= isset($errors['contract_agreed']) ? 'error-field' : '' ?>">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="contract_agreed" name="contract_agreed" required
-                           <?= ($oldInput['contract_agreed'] ?? false) ? 'checked' : '' ?>
-                           class="<?= isset($errors['contract_agreed']) ? 'error' : '' ?>">
-                    <label for="contract_agreed">С контрактом ознакомлен(а)*</label>
-                </div>
-                <?php if (isset($errors['contract_agreed'])): ?>
-                <div class="error-message">Необходимо подтвердить ознакомление</div>
-                <?php endif; ?>
-            </div>
-
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="contract_agreed" name="contract_agreed" required
+               style="width: auto; margin: 0;"
+               <?= ($oldInput['contract_agreed'] ?? false) ? 'checked' : '' ?>
+               class="<?= isset($errors['contract_agreed']) ? 'error' : '' ?>">
+        <label for="contract_agreed" style="margin-bottom: 0;">С контрактом ознакомлен(а)*</label>
+    </div>
+    <?php if (isset($errors['contract_agreed'])): ?>
+    <div class="error-message">Необходимо подтвердить ознакомление</div>
+    <?php endif; ?>
+</div>
             <!-- Кнопка отправки -->
             <button type="submit">Сохранить</button>
         </form>
