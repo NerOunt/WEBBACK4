@@ -1,15 +1,15 @@
 <?php
 session_start();
 
-// Получаем данные из сессии или кук
+
 $errors = $_SESSION['errors'] ?? [];
 $oldInput = $_SESSION['old_input'] ?? [];
 
-// Очищаем данные сессии после использования
+
 unset($_SESSION['errors']);
 unset($_SESSION['old_input']);
 
-// Если нет ошибок, пробуем взять данные из кук
+
 if (empty($errors)) {
     $oldInput = [
         'full_name' => $_COOKIE['full_name'] ?? '',
@@ -23,7 +23,7 @@ if (empty($errors)) {
     ];
 }
 
-// Функция для проверки выбранного языка
+
 function isLanguageSelected($languages, $id) {
     return in_array($id, $languages ?? []);
 }
@@ -140,7 +140,6 @@ function isLanguageSelected($languages, $id) {
         <?php endif; ?>
 
         <form method="POST" action="submit.php">
-            <!-- Поле ФИО -->
             <div class="form-group <?= isset($errors['full_name']) ? 'error-field' : '' ?>">
                 <label for="full_name">ФИО*</label>
                 <input type="text" id="full_name" name="full_name" required
@@ -151,7 +150,7 @@ function isLanguageSelected($languages, $id) {
                 <?php endif; ?>
             </div>
 
-            <!-- Поле Телефон -->
+           
             <div class="form-group <?= isset($errors['phone']) ? 'error-field' : '' ?>">
                 <label for="phone">Телефон*</label>
                 <input type="tel" id="phone" name="phone" required
@@ -162,7 +161,7 @@ function isLanguageSelected($languages, $id) {
                 <?php endif; ?>
             </div>
 
-            <!-- Поле Email -->
+          
             <div class="form-group <?= isset($errors['email']) ? 'error-field' : '' ?>">
                 <label for="email">Email*</label>
                 <input type="email" id="email" name="email" required
@@ -173,7 +172,7 @@ function isLanguageSelected($languages, $id) {
                 <?php endif; ?>
             </div>
 
-            <!-- Поле Дата рождения -->
+           
             <div class="form-group <?= isset($errors['birth_date']) ? 'error-field' : '' ?>">
                 <label for="birth_date">Дата рождения*</label>
                 <input type="date" id="birth_date" name="birth_date" required
@@ -184,7 +183,7 @@ function isLanguageSelected($languages, $id) {
                 <?php endif; ?>
             </div>
 
-            <!-- Поле Пол -->
+          
             <div class="form-group <?= isset($errors['gender']) ? 'error-field' : '' ?>">
                 <label>Пол*</label>
                 <div class="radio-group">
@@ -206,7 +205,7 @@ function isLanguageSelected($languages, $id) {
                 <?php endif; ?>
             </div>
 
-            <!-- Поле Языки программирования -->
+           
             <div class="form-group <?= isset($errors['languages']) ? 'error-field' : '' ?>">
                 <label for="languages">Любимые языки программирования*</label>
                 <select id="languages" name="languages[]" multiple required
@@ -238,7 +237,6 @@ function isLanguageSelected($languages, $id) {
                 <?php endif; ?>
             </div>
 
-            <!-- Поле Биография -->
             <div class="form-group <?= isset($errors['biography']) ? 'error-field' : '' ?>">
                 <label for="biography">Биография</label>
                 <textarea id="biography" name="biography" rows="5"
@@ -248,7 +246,7 @@ function isLanguageSelected($languages, $id) {
                 <?php endif; ?>
             </div>
 
-            <!-- Чекбокс Согласие -->
+          
             <div class="form-group <?= isset($errors['contract_agreed']) ? 'error-field' : '' ?>">
     <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="contract_agreed" name="contract_agreed" required
@@ -261,7 +259,7 @@ function isLanguageSelected($languages, $id) {
     <div class="error-message">Необходимо подтвердить ознакомление</div>
     <?php endif; ?>
 </div>
-            <!-- Кнопка отправки -->
+           
             <button type="submit">Сохранить</button>
         </form>
     </div>
