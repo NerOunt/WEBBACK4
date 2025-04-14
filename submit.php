@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Подключение к базе данных
+
 $host = 'localhost';
 $dbname = 'u68895'; 
 $username = 'u68895'; 
@@ -16,7 +16,7 @@ try {
     exit;
 }
 
-// Валидация данных
+
 $errors = [];
 $input = [
     'full_name' => trim($_POST['full_name'] ?? ''),
@@ -29,28 +29,28 @@ $input = [
     'contract_agreed' => isset($_POST['contract_agreed']) ? 1 : 0
 ];
 
-// Валидация ФИО
+
 if (empty($input['full_name'])) {
     $errors['full_name'] = "ФИО обязательно для заполнения";
 } elseif (!preg_match('/^[а-яА-ЯёЁa-zA-Z\s\-]{2,150}$/u', $input['full_name'])) {
     $errors['full_name'] = "ФИО должно содержать только буквы, пробелы и дефисы (2-150 символов)";
 }
 
-// Валидация телефона
+
 if (empty($input['phone'])) {
     $errors['phone'] = "Телефон обязателен для заполнения";
 } elseif (!preg_match('/^\+?\d{10,15}$/', $input['phone'])) {
     $errors['phone'] = "Телефон должен содержать 10-15 цифр, может начинаться с +";
 }
 
-// Валидация email
+
 if (empty($input['email'])) {
     $errors['email'] = "Email обязателен для заполнения";
 } elseif (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
     $errors['email'] = "Введите корректный email (например, user@example.com)";
 }
 
-// Валидация даты рождения
+
 if (empty($input['birth_date'])) {
     $errors['birth_date'] = "Дата рождения обязательна";
 } else {
@@ -61,12 +61,12 @@ if (empty($input['birth_date'])) {
     }
 }
 
-// Валидация пола
+
 if (empty($input['gender']) || !in_array($input['gender'], ['male', 'female'])) {
     $errors['gender'] = "Укажите пол";
 }
 
-// Валидация языков программирования
+
 if (empty($input['languages'])) {
     $errors['languages'] = "Выберите хотя бы один язык программирования";
 } else {
@@ -79,12 +79,12 @@ if (empty($input['languages'])) {
     }
 }
 
-// Валидация согласия с контрактом
+
 if (!$input['contract_agreed']) {
     $errors['contract_agreed'] = "Необходимо подтвердить ознакомление с контрактом";
 }
 
-// Если есть ошибки
+
 if (!empty($errors)) {
     $_SESSION['errors'] = $errors;
     $_SESSION['old_input'] = $input;
@@ -92,11 +92,11 @@ if (!empty($errors)) {
     exit;
 }
 
-// Сохранение в базу данных
+
 try {
     $pdo->beginTransaction();
 
-    // 1. Сохраняем основную информацию
+   
     $stmt = $pdo->prepare("
         INSERT INTO applications (
             full_name, 
@@ -129,7 +129,7 @@ try {
     
     $applicationId = $pdo->lastInsertId();
 
-    // 2. Сохраняем выбранные языки программирования
+    
     $stmt = $pdo->prepare("
         INSERT INTO application_languages (
             application_id, 
@@ -149,7 +149,7 @@ try {
     
     $pdo->commit();
 
-    // Сохраняем данные в куки на год
+    
     foreach ($input as $key => $value) {
         $cookieValue = is_array($value) ? implode(',', $value) : $value;
         setcookie($key, $cookieValue, time() + 60*60*24*365, '/');
