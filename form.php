@@ -56,12 +56,27 @@
             display: flex;
             align-items: center;
         }
+            .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     
-        .checkbox-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+       .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        width: auto; 
+        margin: 0; 
+    }
+
+    .checkbox-container label {
+        margin-bottom: 0; 
+        font-weight: normal; 
+    }
     </style>
 </head>
 <body>
@@ -172,7 +187,7 @@
     <?php if ($errors['contract_agreed']): ?>
     <div class="error-message">Необходимо подтвердить ознакомление</div>
     <?php endif; ?>
-    </div>
+</div>
             
             <div class="form-group">
                 <button type="submit">Отправить</button>
