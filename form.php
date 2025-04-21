@@ -56,11 +56,7 @@
             display: flex;
             align-items: center;
         }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    
         .checkbox-container {
     display: flex;
     align-items: center;
