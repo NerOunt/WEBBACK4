@@ -1,25 +1,25 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
 
-// Параметры подключения к БД
+
 $db_host = 'localhost';
 $db_name = 'u68895';
 $db_user = 'u68895';
 $db_pass = '1562324';
 
-// Инициализация переменных
+
 $messages = array();
 $errors = array();
 $values = array();
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    // Проверяем наличие сообщения об успешном сохранении
+   
     if (!empty($_COOKIE['save'])) {
         setcookie('save', '', time() - 3600);
         $messages[] = '<div class="success">Результаты сохранены.</div>';
     }
 
-    // Проверяем ошибки в куках
+   
     $error_fields = array(
         'full_name', 'phone', 'email', 'birth_date', 
         'gender', 'languages', 'contract_agreed'
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
     }
 
-    // Загружаем сохраненные значения (хранятся 1 год)
+   
     $value_fields = array(
         'full_name', 'phone', 'email', 'birth_date', 
         'gender', 'biography', 'contract_agreed'
@@ -42,23 +42,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $values[$field] = empty($_COOKIE[$field.'_value']) ? '' : $_COOKIE[$field.'_value'];
     }
 
-    // Особые случаи
+   
     $values['languages'] = empty($_COOKIE['languages_value']) ? array() : explode(',', $_COOKIE['languages_value']);
     $values['contract_agreed'] = !empty($_COOKIE['contract_agreed_value']);
 
-    // Включаем форму
+    
     include('form.php');
 }
 else {
-    // Обработка POST данных
+   
     $validation_failed = false;
 
-    // Валидация полей
+   
     if (empty($_POST['full_name']) || !preg_match('/^[а-яА-ЯёЁa-zA-Z\s\-]{2,150}$/u', $_POST['full_name'])) {
-        setcookie('full_name_error', '1', 0); // До конца сессии
+        setcookie('full_name_error', '1', 0); 
         $validation_failed = true;
     }
-    setcookie('full_name_value', $_POST['full_name'], time() + 365 * 24 * 60 * 60); // На 1 год
+    setcookie('full_name_value', $_POST['full_name'], time() + 365 * 24 * 60 * 60); 
 
     if (empty($_POST['phone']) || !preg_match('/^\+?\d{10,15}$/', $_POST['phone'])) {
         setcookie('phone_error', '1', 0);
