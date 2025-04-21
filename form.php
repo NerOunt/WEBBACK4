@@ -61,6 +61,11 @@
             align-items: center;
             gap: 10px;
         }
+        .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
     </style>
 </head>
 <body>
@@ -161,17 +166,17 @@
                 <textarea id="biography" name="biography"><?= htmlspecialchars($values['biography']) ?></textarea>
             </div>
 
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="contract_agreed" name="contract_agreed" value="1"
-                           <?= $values['contract_agreed'] ? 'checked' : '' ?>
-                           class="<?= $errors['contract_agreed'] ? 'error' : '' ?>">
-                    <label for="contract_agreed">С контрактом ознакомлен(а)*</label>
-                </div>
-                <?php if ($errors['contract_agreed']): ?>
-                <div class="error-message">Необходимо подтвердить ознакомление</div>
-                <?php endif; ?>
-            </div>
+           <div class="form-group">
+    <div class="checkbox-container">
+        <input type="checkbox" id="contract_agreed" name="contract_agreed" value="1"
+               <?= $values['contract_agreed'] ? 'checked' : '' ?>
+               class="<?= $errors['contract_agreed'] ? 'error' : '' ?>">
+        <label for="contract_agreed">С контрактом ознакомлен(а)*</label>
+    </div>
+    <?php if ($errors['contract_agreed']): ?>
+    <div class="error-message">Необходимо подтвердить ознакомление</div>
+    <?php endif; ?>
+    </div>
             
             <div class="form-group">
                 <button type="submit">Отправить</button>
