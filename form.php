@@ -65,7 +65,7 @@
 </head>
 <body>
     <div class="form-container">
-        <h1>Анкета</h1>
+        <h1></h1>
         
         <?php if (!empty($messages)): ?>
             <?php foreach ($messages as $message): ?>
