@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Проверяем наличие сообщения об успешном сохранении
     if (!empty($_COOKIE['save'])) {
         setcookie('save', '', time() - 3600);
-        $messages[] = '<div class="success">Спасибо, результаты сохранены.</div>';
+        $messages[] = '<div class="success">Результаты сохранены.</div>';
     }
 
     // Проверяем ошибки в куках
