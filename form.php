@@ -65,7 +65,6 @@
 </head>
 <body>
     <div class="form-container">
-        <h1></h1>
         
         <?php if (!empty($messages)): ?>
             <?php foreach ($messages as $message): ?>
@@ -159,8 +158,7 @@
 
             <div class="form-group">
                 <label for="biography">Биография</label>
-                <textarea id="biography" name="biography" 
-                          class="<?= $errors['biography'] ? 'error' : '' ?>"><?= htmlspecialchars($values['biography']) ?></textarea>
+                <textarea id="biography" name="biography"><?= htmlspecialchars($values['biography']) ?></textarea>
             </div>
 
             <div class="form-group">
