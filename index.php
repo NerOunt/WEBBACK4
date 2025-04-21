@@ -112,7 +112,7 @@ else {
         exit();
     }
     else {
-        // Удаляем куки с ошибками
+       
         $error_cookies = array(
             'full_name_error', 'phone_error', 'email_error', 
             'birth_date_error', 'gender_error', 'languages_error', 
@@ -123,12 +123,12 @@ else {
             setcookie($cookie, '', time() - 3600);
         }
 
-        // Сохранение в БД
+        
         try {
             $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_user, $db_pass);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
-            // Сохраняем основную информацию
+           
             $stmt = $pdo->prepare("INSERT INTO applications (full_name, phone, email, birth_date, gender, biography, contract_agreed) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $_POST['full_name'],
@@ -142,7 +142,7 @@ else {
             
             $appId = $pdo->lastInsertId();
             
-            // Сохраняем языки программирования
+           
             $stmt = $pdo->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
             foreach ($_POST['languages'] as $langId) {
                 $stmt->execute([$appId, $langId]);
